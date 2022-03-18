@@ -76,10 +76,14 @@ const secondsToHms = (seconds) => {
   return new Date(seconds * 1000).toISOString().substr(11, 8);
 };
 
-const removeFromArray = (element) =>
-  (countdowns = countdowns.filter((item) => item.name !== element));
+const removeFromArray = (element) => {
+  countdowns.splice(
+    countdowns.findIndex((item) => item.name !== element),
+    1
+  );
+};
 
-let countdowns = [];
+const countdowns = [];
 
 module.exports = function (robot) {
   if (!robot.brain.data.task_countdown) {
@@ -87,8 +91,7 @@ module.exports = function (robot) {
   }
 
   robot.respond(/start timer/i, function (msg) {
-    robot.logger.debug("HERE!!!");
-    let parsedYargs = yargs.parse(msg.message.text);
+    const parsedYargs = yargs.parse(msg.message.text);
     const { time, name: passedName, message, channel, here } = parsedYargs;
 
     const name =
@@ -104,7 +107,8 @@ module.exports = function (robot) {
     }
 
     const seconds = hmsToSecondsOnly(time);
-    let date = new Date(Date.now() + seconds * 1000);
+    const prettyHMS = secondsToHms(seconds);
+    const date = new Date(Date.now() + seconds * 1000);
 
     schedule.scheduleJob(name, date, function () {
       var response = [];
@@ -126,13 +130,11 @@ module.exports = function (robot) {
 
     countdowns.push({
       name,
-      date,
-      seconds,
+      date: dayjs(date).format("HH:mm:ss"),
+      seconds: prettyHMS,
     });
 
-    msg.send(
-      `Timer "${name}" has started and will expire in ${secondsToHms(seconds)}.`
-    );
+    msg.send(`Timer "${name}" has started and will expire in ${prettyHMS}.`);
   });
 
   robot.respond(/stop timer/i, function (msg) {
@@ -157,9 +159,7 @@ module.exports = function (robot) {
       : ["No active countdowns"];
     countdowns.forEach((timer) =>
       response.push(
-        `* ${timer.name} (Timer: ${secondsToHms(timer.seconds)}, Ends: ${dayjs(
-          timer.date
-        ).format("HH:mm:ss")})`
+        `${timer.name} (Timer: ${timer.seconds}, Ends: ${timer.date})`
       )
     );
 
@@ -167,7 +167,7 @@ module.exports = function (robot) {
   });
 
   robot.respond(/timer help/i, function (msg) {
-    let help = [
+    const help = [
       "Example Usage: Start 15 minute timer for deploying a new version into UAT.",
       '`jarvis start timer -n "Example timer"`',
       "Example Usage: Stop running timer by name",
