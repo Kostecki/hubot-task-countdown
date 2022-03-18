@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/kwandrews7/hubot-task-countdown#readme",
   "dependencies": {
+    "dayjs": "^1.11.0",
     "node-schedule": "^1.3.2",
     "random-words": "^1.1.2",
     "yargs": "^13.2.4"

@@ -7,6 +7,8 @@
 //
 // Commands:
 //   hubot start timer (opts) -- Start timer with specified options.
+//   hubot stop timer (opts) -- Stop a running timer (-n is required).
+//   hubot timers - Show list of running timers.
 //   hubot timer help -- Provide example and list all available options.
 //
 // Options:
@@ -14,20 +16,24 @@
 //   -n : Name of timer.
 //   -t : Length of timer in the following format: hh:mm:ss
 //   -m : Message to be sent when timer is complete.
+//   -c : Announce timer completion using @channel tag.
+//   -h : Announce timer completion using @here tag.
 //
 // Configuration:
 //   HUBOT_TASK_DEFAULT_SECONDS : Seconds to use when setting and snoozing timers. Default: 600
 //
 // Author:
 //   kwandrews7
+// Forked:
+//   kostecki
 //
 const randomWords = require("random-words");
+const dayjs = require("dayjs");
 const schedule = require("node-schedule");
 const yargs = require("yargs")
   .option("n", {
     alias: "name",
     description: "Name of the timer.",
-    default: randomWords({ exactly: 1, wordsPerString: 2, separator: "-" }),
   })
   .option("t", {
     alias: "time",
@@ -38,11 +44,13 @@ const yargs = require("yargs")
     alias: "message",
     description: "Message to be sent when timer is complete.",
   })
-  .option("channel", {
+  .option("c", {
+    alias: "channel",
     description: "Announce timer completion using `@channel` tag.",
     type: "boolean",
   })
-  .option("here", {
+  .option("h", {
+    alias: "here",
     description: "Announce timer completion using `@here` tag.",
     type: "boolean",
   });
@@ -69,7 +77,7 @@ const secondsToHms = (seconds) => {
 };
 
 const removeFromArray = (element) =>
-  (countdowns = countdowns.filter((item) => item !== element));
+  (countdowns = countdowns.filter((item) => item.name !== element));
 
 let countdowns = [];
 
@@ -81,9 +89,13 @@ module.exports = function (robot) {
   robot.respond(/start timer/i, function (msg) {
     robot.logger.debug("HERE!!!");
     let parsedYargs = yargs.parse(msg.message.text);
-    const { time, name, message, channel, here } = parsedYargs;
+    const { time, name: passedName, message, channel, here } = parsedYargs;
 
-    if (countdowns.includes(name)) {
+    const name =
+      passedName ||
+      randomWords({ exactly: 1, wordsPerString: 2, separator: "-" })[0];
+
+    if (countdowns.some((c) => c.name === name)) {
       msg.send(
         `A timer with the name ${name} is already running. Be more creative`
       );
@@ -112,7 +124,11 @@ module.exports = function (robot) {
       msg.send(`${response.join("\n")}`);
     });
 
-    countdowns.push(name);
+    countdowns.push({
+      name,
+      date,
+      seconds,
+    });
 
     msg.send(
       `Timer "${name}" has started and will expire in ${secondsToHms(seconds)}.`
@@ -131,7 +147,18 @@ module.exports = function (robot) {
   });
 
   robot.respond(/timers/i, function (msg) {
-    console.log(countdowns);
+    const response = countdowns.length
+      ? ["Currently active countdowns: "]
+      : ["No active countdowns"];
+    countdowns.forEach((timer) =>
+      response.push(
+        `* ${timer.name} (Timer: ${secondsToHms(timer.seconds)}, Ends: ${dayjs(
+          timer.date
+        ).format("HH:mm:ss")})`
+      )
+    );
+
+    msg.send(response.join("\n"));
   });
 
   robot.respond(/timer help/i, function (msg) {
@@ -140,6 +167,9 @@ module.exports = function (robot) {
       '`jarvis start timer -n "Example timer"`',
       "Example Usage: Stop running timer by name",
       '`jarvis stop timer -n "Example timer"`',
+      "Exmaple Usage: Get names of current timers",
+      "`jarvis timers`",
+      "",
       "```Options:",
       "-n, --name     Name of the timer.",
       "-t, --time     Length of timer in the following format: hh:mm:ss.",
@@ -147,6 +177,7 @@ module.exports = function (robot) {
       "--channel      Announce timer completion using @channel tag.",
       "--here         Announce timer completion using @here tag.```",
     ];
+
     msg.send(help.join("\n"));
   });
 };
