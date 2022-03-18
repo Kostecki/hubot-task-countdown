@@ -169,11 +169,11 @@ module.exports = function (robot) {
   robot.respond(/timer help/i, function (msg) {
     const help = [
       "Example Usage: Start 15 minute timer for deploying a new version into UAT.",
-      '`jarvis start timer -n "Example timer"`',
+      '`hubot start timer -n "Example timer"`',
       "Example Usage: Stop running timer by name",
-      '`jarvis stop timer "Example timer"`',
+      '`hubot stop timer "Example timer"`',
       "Exmaple Usage: Get names of current timers",
-      "`jarvis timers`",
+      "`hubot timers`",
       "",
       "```Options:",
       "-n, --name     Name of the timer.",
