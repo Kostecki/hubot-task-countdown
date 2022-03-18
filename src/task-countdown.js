@@ -21,12 +21,13 @@
 // Author:
 //   kwandrews7
 //
-
+const randomWords = require("random-words");
 const schedule = require("node-schedule");
 const yargs = require("yargs")
   .option("n", {
     alias: "name",
     description: "Name of the timer.",
+    default: randomWords({ exactly: 1, wordsPerString: 2, separator: "-" }),
   })
   .option("t", {
     alias: "time",
