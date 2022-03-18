@@ -1,27 +1,33 @@
 # hubot-task-countdown
-A hubot script for announcing task countdowns and allowing user snoozing. 
 
-[![NPM](https://nodei.co/npm/hubot-task-countdown.png?downloads=true&&downloadRank=true&stars=true)](https://nodei.co/npm/hubot-task-countdown/)
+A quick fork that adds features i needed:
 
-Have question, comment, or feature request? Reach out to me on Twitter [@kwandrews7](https://twitter.com/kwandrews7) or open up an issue here in the GitHub repo.
+- Pass time as hh:mm:ss, mm:ss or ss
+- Ability to stop running timers by name
+- Command to show running timers
 
 ## Commands
 
- * `hubot start timer (opts)` - Start timer with specified options.
- * `hubot timer help` - Provide example and list all available options.
+- `hubot start timer (opts)` - Start timer with specified options.
+- `hubot stop timer (opts)` - Stop a running timer (-n is required)
+- `hubot timers` - Show list of running timers
+- `hubot timer help` - Provide example and list all available options.
 
 ### Options:
 
- *  -name    : Name of timer.
- *   -seconds : Length of timer in seconds.
- *   -message : Message to be sent when timer is complete.
+- -n, --name : Name of timer. If no name a random one will be assigned to the timer.
+- -s, --seconds : Length of timer in the following format: hh:mm:ss, mm:ss or ss.
+- -m, --message : Message to be sent when timer is complete.
+- -c, --channel : Announce timer completion using @channel tag.
+- -h, --here : Announce timer completion using @here tag.
 
 ### Configuration:
- *   HUBOT_TASK_DEFAULT_SECONDS : Seconds to use when setting and snoozing timers. Default: 300
+
+- HUBOT_TASK_DEFAULT_SECONDS : Seconds to use when setting and snoozing timers. Default: 600
 
 ## Installation
 
-Run the following command 
+Run the following command
 
     $ npm install hubot-task-countdown --save
 
@@ -32,15 +38,5 @@ file (you may need to create this file).
 
 ## Dependencies
 
- * node-schedule: ^1.3.2
- * yargs: ^13.2.4
-
-## Release Notes
-
-### 0.1.0
-
-* Initial release. 
-* Published to npm for alpha testing.
-* Supports kicking off timers.
-* **Does not yet support persisting timers to hubot brain. Timers may be lost during a bounce of the hubot instance.**
-* **Does not yet support snoozing the timer.**
+- node-schedule: ^1.3.2
+- yargs: ^13.2.4
