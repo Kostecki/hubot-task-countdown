@@ -136,14 +136,19 @@ module.exports = function (robot) {
   });
 
   robot.respond(/stop timer/i, function (msg) {
-    const parsedYargs = yargs.parse(msg.message.text);
-    const { name } = parsedYargs;
+    const name = msg.message.text.includes('"')
+      ? msg.message.text.match(/"([^"]*)"/)[1]
+      : msg.message.text.split(" ")[3];
 
     const countdown = schedule.scheduledJobs[name];
-    countdown.cancel();
-    removeFromArray(name);
+    if (countdown) {
+      countdown.cancel();
+      removeFromArray(name);
 
-    msg.send(`Timer "${name} has been cancelled`);
+      msg.send(`Timer "${name} has been cancelled`);
+    } else {
+      msg.send(`Couldn't find any timers with the name "${name}`);
+    }
   });
 
   robot.respond(/timers/i, function (msg) {
@@ -166,7 +171,7 @@ module.exports = function (robot) {
       "Example Usage: Start 15 minute timer for deploying a new version into UAT.",
       '`jarvis start timer -n "Example timer"`',
       "Example Usage: Stop running timer by name",
-      '`jarvis stop timer -n "Example timer"`',
+      '`jarvis stop timer "Example timer"`',
       "Exmaple Usage: Get names of current timers",
       "`jarvis timers`",
       "",

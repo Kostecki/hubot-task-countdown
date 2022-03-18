@@ -9,7 +9,7 @@ A quick fork that adds features i needed:
 ## Commands
 
 - `hubot start timer (opts)` - Start timer with specified options.
-- `hubot stop timer (opts)` - Stop a running timer (-n is required)
+- `hubot stop timer "timer name"` - Stop a running timer (name is required)
 - `hubot timers` - Show list of running timers
 - `hubot timer help` - Provide example and list all available options.
 
