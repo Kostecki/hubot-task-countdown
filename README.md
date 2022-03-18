@@ -38,5 +38,7 @@ file (you may need to create this file).
 
 ## Dependencies
 
+- dayjs: ^1.11.0
 - node-schedule: ^1.3.2
+- random-words: ^1.1.2
 - yargs: ^13.2.4
